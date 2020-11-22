@@ -1,0 +1,68 @@
+# this function will create a prompt for git repositories
+# copied from: github.com/mathiasbynens
+prompt_git() {
+	local s='';
+	local branchName='';
+
+	# Check if the current directory is in a Git repository.
+	git rev-parse --is-inside-work-tree &>/dev/null || return;
+
+	# Check for what branch we’re on.
+	# Get the short symbolic ref. If HEAD isn’t a symbolic ref, get a
+	# tracking remote branch or tag. Otherwise, get the
+	# short SHA for the latest commit, or give up.
+	branchName="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
+		git describe --all --exact-match HEAD 2> /dev/null || \
+		git rev-parse --short HEAD 2> /dev/null || \
+		echo '(unknown)')";
+
+
+	repoUrl="$(git config --get remote.origin.url)";
+	if grep -q 'chromium/src.git' <<< "${repoUrl}"; then
+		s+='*';
+	else
+		# uncommitted changes in the index.
+		if ! $(git diff --quiet --ignore-submodules --cached); then
+			s+='+';
+		fi;
+		# unstaged changes.
+		if ! $(git diff-files --quiet --ignore-submodules --); then
+			s+='!';
+		fi;
+		# untracked files.
+		if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+			s+='?';
+		fi;
+		# stashed files.
+		if $(git rev-parse --verify refs/stash &>/dev/null); then
+			s+='$';
+		fi;
+	fi;
+
+	[ -n "${s}" ] && s=" ${2}[${3}${s}${2}]";
+
+	echo -e "${1}${branchName}${s}";
+}
+
+
+# colors
+BOLD="\[\e[1m\]"
+BLACK="\[\e[1;30m\]"
+RED="\[\e[31m\]"
+GREEN="\[\e[32m\]"
+YELLOW="\[\e[33m\]"
+BLUE="\[\e[34m\]"
+VIOLET="\[\e[35m\]"
+CYAN="\[\e[36m\]"
+WHITE="\[\e[37m\]"
+RESET="\[\e[0m\]"
+
+
+PS1="${BOLD}${YELLOW}\u${RESET} "
+# PS1+=" @ "
+# PS1+="${GREEN}\h ${RESET} "
+PS1+="$RED[${BLUE} \w $RED]${RESET}"
+PS1+="\$(prompt_git \" on ${VIOLET}\" \"${WHITE}\" \"${CYAN}\")${RESET}";
+PS1+=" $ "
+
+export PS1
