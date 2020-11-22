@@ -27,3 +27,6 @@ alias pip='pip3'
 
 # make rm interactive by default
 alias rm='rm -i'
+
+# git
+alias gits='git status'
