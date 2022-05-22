@@ -30,3 +30,4 @@ alias rm='rm -i'
 
 # git
 alias gits='git status'
+alias gitl="git log --oneline --graph --decorate"

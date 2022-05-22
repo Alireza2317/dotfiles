@@ -15,10 +15,6 @@ HISTFILESIZE=20000
 shopt -s checkwinsize
 
 
-# let cd to run even if the directory was misspelled
-shopt -s cdspell
-
-
 # load aliases
 [ -f ~/.bash_aliases ] && source ~/.bash_aliases
 
